@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.3">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!doctype html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta charset="utf-8" /&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width,initial-scale=1" /&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;title&gt;System Life Mastery&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;style&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>body { font: 18px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial; margin: 0; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.crumbs a { text-decoration: none; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>ul { margin: .4rem 0 .4rem 1.1rem; padding: 0; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>li { margin: .25rem 0; cursor: pointer; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>li &gt; span { display: inline-block; padding: 2px 4px; border-radius: 6px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>li &gt; span:hover { background: rgba(0,0,0,.06); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.note { opacity: .75; margin-left: .4rem; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="wrap"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="crumbs" id="crumbs"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="view"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;script&gt;</span></p>
+<p class="p1"><span class="s1">(async function () {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const res = await fetch('./slm.opml', { cache: 'no-store' });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const text = await res.text();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const xml = new DOMParser().parseFromString(text, 'text/xml');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// OPML: &lt;body&gt;&lt;outline text="..."&gt;&lt;outline .../&gt;&lt;/outline&gt;&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const rootOutlines = Array.from(xml.querySelectorAll('opml &gt; body &gt; outline'));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// Build a lightweight tree with stable ids</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>let idCounter = 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>function build(node, parentId=null) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const id = String(++idCounter);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const text = node.getAttribute('text') || '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const note = node.getAttribute('_note') || node.getAttribute('note') || '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const children = Array.from(node.children).filter(n =&gt; n.tagName === 'outline').map(ch =&gt; build(ch, id));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return { id, parentId, text, note, children };</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const forest = rootOutlines.map(n =&gt; build(n));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// index by id</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const byId = new Map();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>(function index(nodes){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>for (const n of nodes) { byId.set(n.id, n); index(n.children); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>})(forest);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>function getPath(nodeId) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const path = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let cur = byId.get(nodeId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>while (cur) { path.unshift(cur); cur = cur.parentId ? byId.get(cur.parentId) : null; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return path;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>function render(nodeId=null) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const container = document.getElementById('view');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const crumbs = document.getElementById('crumbs');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>container.innerHTML = '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>crumbs.innerHTML = '';</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let nodesToShow, path=[];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (!nodeId) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>nodesToShow = forest;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>crumbs.textContent = 'Home';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const node = byId.get(nodeId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>path = getPath(nodeId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// breadcrumbs</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const parts = ['&lt;a href="#"&gt;&lt;/a&gt;'];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>crumbs.innerHTML = path.map((p, i) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const isLast = i === path.length - 1;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>return isLast</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>? `&lt;strong&gt;${escapeHtml(p.text)}&lt;/strong&gt;`</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>: `&lt;a href="#node=${p.id}"&gt;${escapeHtml(p.text)}&lt;/a&gt; / `;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>nodesToShow = node.children;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>container.appendChild(renderList(nodesToShow));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>function renderList(nodes) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const ul = document.createElement('ul');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>for (const n of nodes) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const li = document.createElement('li');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const label = document.createElement('span');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>label.textContent = n.text || '(empty)';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>label.onclick = () =&gt; { location.hash = `node=${n.id}`; };</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>li.appendChild(label);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (n.note) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const note = document.createElement('span');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>note.className = 'note';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>note.textContent = '— ' + n.note;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>li.appendChild(note);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>ul.appendChild(li);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return ul;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>function escapeHtml(s){ return (s||'').replace(/[&amp;&lt;&gt;"']/g, c =&gt; ({'&amp;':'&amp;amp;','&lt;':'&amp;lt;','&gt;':'&amp;gt;','"':'&amp;quot;',"'":'&amp;#39;'}[c])); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>function onHash() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const m = location.hash.match(/node=(\d+)/);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>render(m ? m[1] : null);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>window.addEventListener('hashchange', onHash);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>onHash();</span></p>
+<p class="p1"><span class="s1">})();</span></p>
+<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
